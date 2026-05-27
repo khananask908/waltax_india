@@ -1,0 +1,1 @@
+export { default } from '@/views/services/ITR3Page';

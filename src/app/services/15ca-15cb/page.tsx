@@ -1,0 +1,1 @@
+export { default } from '@/views/services/Form15CA15CBPage';

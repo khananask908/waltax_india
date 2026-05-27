@@ -1,0 +1,73 @@
+'use client';
+
+import ServiceTemplate from '../../components/ui/ServiceTemplate';
+
+const PartnershipPage = () => {
+  const benefits = [
+    "Shared responsibility and resources between partners",
+    "Simple registration process with minimal documentation",
+    "Flexible profit sharing arrangements",
+    "Easy to dissolve or modify partnership terms",
+    "Lower compliance requirements compared to companies",
+    "Tax benefits and deductions available"
+  ];
+
+  const pricingPlans = [
+    {
+      id: 'basic',
+      name: 'Basic Plan',
+      price: 4999,
+      originalPrice: 7999,
+      description: 'Essential partnership registration',
+      features: [
+        'Partnership Deed Drafting',
+        'Partnership Registration',
+        'PAN Card Application',
+        'Expert Consultation',
+        'Document Verification'
+      ]
+    },
+    {
+      id: 'value',
+      name: 'Value Plan',
+      price: 8999,
+      originalPrice: 12999,
+      popular: true,
+      description: 'Comprehensive partnership package',
+      features: [
+        'Everything in Basic Plan',
+        'UDYAM Registration',
+        'GST Registration',
+        'Bank Account Opening Support',
+        'Partnership Agreement Review'
+      ]
+    },
+    {
+      id: 'premium',
+      name: 'Premium Plan',
+      price: 14999,
+      originalPrice: 19999,
+      description: 'Complete partnership setup',
+      features: [
+        'Everything in Value Plan',
+        'Import Export Code (IEC)',
+        'ISO Registration',
+        'Digital Signature Certificate',
+        'Legal Compliance Checklist'
+      ]
+    }
+  ];
+
+  return (
+    <ServiceTemplate
+      title="Partnership Registration"
+      description="Form a partnership with shared responsibilities and profits. Ideal for businesses with multiple owners who want to combine their skills and resources for mutual benefit."
+      benefits={benefits}
+      videoId="dQw4w9WgXcQ"
+      pricingPlans={pricingPlans}
+      isStartupService={true}
+    />
+  );
+};
+
+export default PartnershipPage;

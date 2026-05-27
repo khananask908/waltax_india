@@ -1,0 +1,41 @@
+{
+    "name": "waltax-india-website",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "lint": "eslint .",
+        "preview": "next start",
+        "start": "next start"
+    },
+    "dependencies": {
+        "framer-motion": "^10.18.0",
+        "keen-slider": "^6.8.6",
+        "lucide-react": "^0.263.1",
+        "next": "^14.2.23",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "zustand": "^4.5.0"
+    },
+    "devDependencies": {
+        "@babel/plugin-transform-react-constant-elements": "^7.27.1",
+        "@babel/plugin-transform-react-inline-elements": "^7.27.1",
+        "@babel/preset-typescript": "^7.28.5",
+        "@eslint/js": "^9.9.1",
+        "@types/node": "25.9.1",
+        "@types/react": "^18.3.5",
+        "@types/react-dom": "^18.3.0",
+        "autoprefixer": "^10.4.18",
+        "eslint": "^9.9.1",
+        "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+        "eslint-plugin-react-refresh": "^0.4.11",
+        "globals": "^15.9.0",
+        "postcss": "^8.4.35",
+        "tailwindcss": "^3.4.1",
+        "terser": "^5.44.0",
+        "typescript": "^5.5.3",
+        "typescript-eslint": "^8.3.0"
+    }
+}

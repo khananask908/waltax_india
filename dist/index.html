@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WalTax India - Business & Legal Filing Services</title>
+    
+    <!-- Critical CSS for instant loading -->
+    <style>
+      /* Critical CSS for immediate rendering */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: system-ui, -apple-system, sans-serif; }
+      
+      /* Loading shell styles */
+      #loading-shell {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      .loading-content {
+        text-align: center;
+        color: white;
+      }
+      
+      .loading-logo {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        backdrop-filter: blur(10px);
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      
+      .loading-subtitle {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      
+      /* Hide shell when loaded */
+      .loaded #loading-shell {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//images.pexels.com">
+    <link rel="dns-prefetch" href="//www.youtube.com">
+    <script type="module" crossorigin src="/assets/index-IFzikY7h.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-DbX8BlWd.js">
+    <link rel="modulepreload" crossorigin href="/assets/icons-C4K7RErk.js">
+    <link rel="modulepreload" crossorigin href="/assets/state-D-xpTLUB.js">
+    <link rel="modulepreload" crossorigin href="/assets/animations-Y6C05Tel.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DgWt2ZNj.css">
+  </head>
+  <body>
+    <!-- Loading Shell -->
+    <div id="loading-shell">
+      <div class="loading-content">
+        <div class="loading-logo">
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="loading-text">WalTax India</div>
+        <div class="loading-subtitle">Loading your business platform...</div>
+      </div>
+    </div>
+    
+    <!-- React App -->
+    <div id="root"></div>
+    
+    <!-- Remove loading shell when DOM is ready -->
+    <script>
+      // Remove loading shell when React is ready
+      function removeLoadingShell() {
+        const shell = document.getElementById('loading-shell');
+        if (shell) {
+          shell.style.opacity = '0';
+          setTimeout(() => {
+            shell.remove();
+          }, 300);
+        }
+      }
+      
+      // Listen for React app ready
+      window.addEventListener('DOMContentLoaded', () => {
+        // Check if React content is loaded
+        const checkReactLoaded = () => {
+          const root = document.getElementById('root');
+          if (root && root.children.length > 0) {
+            removeLoadingShell();
+          } else {
+            setTimeout(checkReactLoaded, 50);
+          }
+        };
+        
+        // Start checking after a short delay
+        setTimeout(checkReactLoaded, 100);
+      });
+      
+      // Fallback: remove shell after 5 seconds
+      setTimeout(removeLoadingShell, 5000);
+    </script>
+    
+  </body>
+</html>
