@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, ChevronDown, ShoppingCart } from 'lucide-react';
@@ -99,14 +99,10 @@ const Header = ({ isScrolled }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
   const { items } = useCartStore();
   const pathname = usePathname();
   const router = useRouter();
-
-  useEffect(() => {
-    setAuthenticated(isAuthenticated());
-  }, []);
+  const authenticated = isAuthenticated();
 
   const isHomePage = pathname === '/';
   const isSolidHeader = isScrolled || !isHomePage;

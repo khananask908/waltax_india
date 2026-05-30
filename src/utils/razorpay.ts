@@ -48,18 +48,36 @@ export const loadRazorpay = (): Promise<boolean> => {
 };
 
 export const createRazorpayOrder = async (amount: number, orderId: string) => {
-  // Create Razorpay order - in production, this should call your backend
-  return {
-    id: orderId,
-    amount: amount * 100, // Convert to paise
-    currency: 'INR'
-  };
+  const response = await fetch('/api/create-order', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ amount, receipt: orderId })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || 'Failed to create Razorpay order');
+  }
+
+  return response.json();
 };
 
 export const verifyPayment = async (paymentData: any) => {
-  // Verify payment signature - in production, this should be done on your backend
-  console.log('Payment verification:', paymentData);
-  return { success: true };
+  const response = await fetch('/api/verify-payment', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(paymentData)
+  });
+
+  if (!response.ok) {
+    return { success: false };
+  }
+
+  return response.json();
 };
 
 export const initializeRazorpay = async (): Promise<boolean> => {

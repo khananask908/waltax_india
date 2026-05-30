@@ -9,9 +9,10 @@ import Button from '../components/ui/Button';
 import { useCartStore } from '../store/cartStore';
 import { useWalletStore } from '../store/walletStore';
 
-import { initializeRazorpay, createRazorpayOrder } from '../utils/razorpay';
+import { initializeRazorpay, createRazorpayOrder, verifyPayment } from '../utils/razorpay';
 
 const PaymentPage = () => {
+  
   const [selectedMethod, setSelectedMethod] = useState<string>('razorpay');
   const [showQR, setShowQR] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
@@ -118,17 +119,19 @@ const PaymentPage = () => {
           console.log('Payment successful:', response);
           
           try {
-            // Verify payment (in production, this should be done on backend)
-            const verificationResult = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              })
-            }).catch(() => ({ ok: true })); // Fallback for demo
-            
+            const verificationResult = await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            if (!verificationResult.success) {
+              console.error('Razorpay payment verification failed:', verificationResult);
+              alert('Payment verification failed. Please try again or contact support.');
+              setPaymentProcessing(false);
+              return;
+            }
+
             // Add cashback for successful payment
             if (finalTotal > 0) {
               const cashback = Math.floor(finalTotal * 0.5);
@@ -147,11 +150,9 @@ const PaymentPage = () => {
             }, 3000);
             
           } catch (error) {
-            console.error('Error processing cashback:', error);
-            // Still show success even if cashback fails
-            setPaymentSuccess(true);
-            clearCart();
-            setTimeout(() => router.push('/dashboard'), 3000);
+            console.error('Error processing payment:', error);
+            alert('An error occurred while completing your payment. Please try again.');
+            setPaymentProcessing(false);
           }
         },
         modal: {
