@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Check, Star } from 'lucide-react';
 import Button from './Button';
 import { useCartStore } from '../../store/cartStore';
+import { getCurrentUser } from '../../lib/auth';
 
 interface PricingPlan {
   id: string;
@@ -25,6 +26,11 @@ const PricingCard = ({ plan, serviceName, onSelect }: PricingCardProps) => {
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
+    if (!getCurrentUser()) {
+      window.location.href = '/login?redirect=%2Fdashboard';
+      return;
+    }
+
     console.log('Adding to cart:', {
       id: `${serviceName}-${plan.id}`,
       name: `${serviceName} - ${plan.name}`,

@@ -36,16 +36,17 @@ const LoginPage = () => {
 
     setIsLoading(true);
 
-    const result = await loginUser(email, password);
+    const result = await loginUser(email, password, false);
 
     setIsLoading(false);
 
-    if (!result.success) {
+    if (result.success !== true || !('user' in result)) {
       setError(result.error ?? 'Unable to sign in. Please try again.');
       return;
     }
 
-    router.push(redirectTo);
+    const nextPath = result.user.role === 'admin' ? '/admin' : redirectTo;
+    router.push(nextPath);
   };
 
   return (
@@ -84,9 +85,19 @@ const LoginPage = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full py-3" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button type="submit" className="flex-1 py-3" disabled={isLoading}>
+                  {isLoading ? 'Signing in...' : 'Sign In'}
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800"
+                  disabled={isLoading}
+                  onClick={() => router.push('/admin-login')}
+                >
+                  Admin Login
+                </Button>
+              </div>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-600">

@@ -7,6 +7,7 @@ import Container from '../components/ui/Container';
 import Button from '../components/ui/Button';
 import { useCartStore } from '../store/cartStore';
 import { initializeRazorpay } from '../utils/razorpay';
+import { getCurrentUser } from '../lib/auth';
 
 const HireTeamPage = () => {
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
@@ -103,6 +104,11 @@ const HireTeamPage = () => {
   };
 
   const handleAddToCart = () => {
+    if (!getCurrentUser()) {
+      window.location.href = '/login?redirect=%2Fdashboard';
+      return;
+    }
+
     const plan = teamPlans.find((p) => p.id === selectedTeam);
     if (!plan || selectedMembers.length === 0) return;
 

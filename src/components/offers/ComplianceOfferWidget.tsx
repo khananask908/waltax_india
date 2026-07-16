@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, CheckCircle, Clock, Star, Sparkles } from 'lucide-react';
 import Button from '../ui/Button';
 import { useCartStore } from '../../store/cartStore';
+import { getCurrentUser } from '../../lib/auth';
 
 const ComplianceOfferWidget = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -57,6 +58,11 @@ const ComplianceOfferWidget = () => {
   };
 
   const handleAddToCart = () => {
+    if (!getCurrentUser()) {
+      window.location.href = '/login?redirect=%2Fdashboard';
+      return;
+    }
+
     addItem({
       id: 'compliance-health-checkup-199',
       name: 'Compliance Health Checkup - Special Offer',

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, ChevronDown, ShoppingCart } from 'lucide-react';
 import Logo from './Logo';
 import { useCartStore } from '../../store/cartStore';
 import CartDropdown from '../cart/CartDropdown';
-import { isAuthenticated, logoutUser } from '@/lib/auth';
+import { getCurrentUser, isAuthenticated, logoutUser } from '@/lib/auth';
 
 interface HeaderProps {
   isScrolled: boolean;
@@ -99,10 +99,28 @@ const Header = ({ isScrolled }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { items } = useCartStore();
   const pathname = usePathname();
   const router = useRouter();
-  const authenticated = isAuthenticated();
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setAuthenticated(isAuthenticated());
+      setIsAdmin(getCurrentUser()?.role === 'admin');
+    };
+
+    syncAuthState();
+
+    window.addEventListener('storage', syncAuthState);
+    window.addEventListener('waltax-auth-state-changed', syncAuthState);
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState);
+      window.removeEventListener('waltax-auth-state-changed', syncAuthState);
+    };
+  }, []);
 
   const isHomePage = pathname === '/';
   const isSolidHeader = isScrolled || !isHomePage;
@@ -110,6 +128,7 @@ const Header = ({ isScrolled }: HeaderProps) => {
   const handleLogout = () => {
     logoutUser();
     setAuthenticated(false);
+    setIsAdmin(false);
     router.push('/login');
   };
 
@@ -164,13 +183,26 @@ const Header = ({ isScrolled }: HeaderProps) => {
 
           <div className="hidden lg:flex items-center space-x-3">
             <div className="relative">
-              <button onClick={() => setShowCartDropdown(!showCartDropdown)} className={`relative p-2 rounded-lg transition-all duration-300 hover:scale-110 ${isScrolled ? 'bg-primary-100 text-primary-600 hover:bg-primary-200' : 'bg-white/20 text-white hover:bg-white/30'}`}>
+              <button
+                onClick={() => {
+                  if (!authenticated) {
+                    router.push('/login?redirect=%2Fdashboard');
+                    return;
+                  }
+                  setShowCartDropdown(!showCartDropdown);
+                }}
+                className={`relative p-2 rounded-lg transition-all duration-300 hover:scale-110 ${isScrolled ? 'bg-primary-100 text-primary-600 hover:bg-primary-200' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                title={authenticated ? 'Cart' : 'Login to access cart'}
+              >
                 <ShoppingCart className="h-5 w-5" />
                 {items.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">{items.length}</span>}
               </button>
-              {showCartDropdown && <CartDropdown onClose={() => setShowCartDropdown(false)} />}
+              {showCartDropdown && authenticated && <CartDropdown onClose={() => setShowCartDropdown(false)} />}
             </div>
             <Link href={authenticated ? '/dashboard' : '/login?redirect=%2Fdashboard'} className="px-3 py-1.5 bg-white border border-primary-600 text-primary-600 rounded-md hover:bg-primary-50 transition-colors text-sm">Dashboard</Link>
+            {isAdmin && (
+              <Link href="/admin" className="px-3 py-1.5 bg-white border border-primary-600 text-primary-600 rounded-md hover:bg-primary-50 transition-colors text-sm">Admin</Link>
+            )}
             {authenticated ? (
               <button onClick={handleLogout} className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">Logout</button>
             ) : (
@@ -197,12 +229,25 @@ const Header = ({ isScrolled }: HeaderProps) => {
               <Link href="/hire-team" className="font-medium text-gray-700 animate-pulse" onClick={() => setIsMenuOpen(false)}>Hire a Team</Link>
               <Link href="/blog" className="font-medium text-gray-700" onClick={() => setIsMenuOpen(false)}>Blog</Link>
               <Link href={authenticated ? '/dashboard' : '/login?redirect=%2Fdashboard'} className="py-2 px-4 bg-primary-600 text-white rounded-md text-center" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
+              {isAdmin && (
+                <Link href="/admin" className="py-2 px-4 bg-white border border-primary-600 text-primary-600 rounded-md text-center" onClick={() => setIsMenuOpen(false)}>Admin</Link>
+              )}
               {authenticated ? (
                 <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="py-2 px-4 bg-red-600 text-white rounded-md text-center hover:bg-red-700 transition-colors">Logout</button>
               ) : (
                 <Link href="/login" className="py-2 px-4 bg-primary-600 text-white rounded-md text-center" onClick={() => setIsMenuOpen(false)}>Login</Link>
               )}
-              <button onClick={() => setShowCartDropdown(!showCartDropdown)} className="flex items-center gap-2 w-full p-3 bg-primary-100 text-primary-700 rounded-lg">
+              <button
+                onClick={() => {
+                  if (!authenticated) {
+                    router.push('/login?redirect=%2Fdashboard');
+                    return;
+                  }
+                  setShowCartDropdown(!showCartDropdown);
+                }}
+                className="flex items-center gap-2 w-full p-3 bg-primary-100 text-primary-700 rounded-lg"
+                title={authenticated ? 'Cart' : 'Login to access cart'}
+              >
                 <ShoppingCart className="h-5 w-5" />
                 <span>Cart ({items.length})</span>
               </button>

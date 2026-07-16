@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Download, Trash2, File, FileText, Image, Video, Music } from 'lucide-react';
 import Button from '../ui/Button';
+import { getAuthToken, getCurrentUser } from '@/lib/auth';
 
 interface UploadedFile {
   id: string;
@@ -12,42 +13,44 @@ interface UploadedFile {
   type: string;
   uploadDate: string;
   url: string;
+  uploadedBy?: string;
+  uploadedByEmail?: string;
 }
 
 const FileManager = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [removingFileId, setRemovingFileId] = useState<string | null>(null);
+  const currentUser = getCurrentUser();
 
-  // Mock data for demonstration
-  useEffect(() => {
-    const mockFiles: UploadedFile[] = [
-      {
-        id: '1',
-        name: 'Company_Registration_Documents.pdf',
-        size: 2048576,
-        type: 'application/pdf',
-        uploadDate: '2024-01-15',
-        url: '#'
-      },
-      {
-        id: '2',
-        name: 'GST_Certificate.jpg',
-        size: 1024000,
-        type: 'image/jpeg',
-        uploadDate: '2024-01-10',
-        url: '#'
-      },
-      {
-        id: '3',
-        name: 'Financial_Statements.xlsx',
-        size: 512000,
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        uploadDate: '2024-01-05',
-        url: '#'
+  const fetchFiles = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/uploads', {
+        headers: {
+          Authorization: `Bearer ${getAuthToken() || ''}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to load files right now.');
       }
-    ];
-    setFiles(mockFiles);
+
+      const data = await response.json();
+      setFiles(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load files.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void fetchFiles();
   }, []);
 
   const getFileIcon = (type: string) => {
@@ -67,26 +70,43 @@ const FileManager = () => {
   };
 
   const handleFileUpload = async (selectedFiles: FileList) => {
-    setUploading(true);
-    
-    // Simulate file upload
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i];
-      const newFile: UploadedFile = {
-        id: Date.now().toString() + i,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        uploadDate: new Date().toISOString().split('T')[0],
-        url: URL.createObjectURL(file)
-      };
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setFiles(prev => [...prev, newFile]);
+    if (!getAuthToken()) {
+      setError('Please sign in before uploading files.');
+      return;
     }
-    
-    setUploading(false);
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('uploaderName', currentUser?.name || '');
+        formData.append('uploaderEmail', currentUser?.email || '');
+
+        const response = await fetch('/api/uploads', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${getAuthToken() || ''}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Upload failed.');
+        }
+
+        const uploadedFile = await response.json();
+        setFiles(prev => [uploadedFile, ...prev]);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to upload files.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -105,22 +125,53 @@ const FileManager = () => {
     }
   };
 
-  const deleteFile = (id: string) => {
-    setFiles(prev => prev.filter(file => file.id !== id));
-  };
-
   const downloadFile = (file: UploadedFile) => {
-    // In a real implementation, this would download from cloud storage
     const link = document.createElement('a');
     link.href = file.url;
     link.download = file.name;
     link.click();
   };
 
+  const deleteFile = async (file: UploadedFile) => {
+    if (!getAuthToken()) {
+      setError('Please sign in before deleting files.');
+      return;
+    }
+
+    setRemovingFileId(file.id);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/uploads?id=${encodeURIComponent(file.id)}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getAuthToken() || ''}`,
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to delete file.');
+      }
+
+      setFiles(prev => prev.filter(item => item.id !== file.id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete file.');
+    } finally {
+      setRemovingFileId(null);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">File Manager</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">File Manager</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {currentUser ? `Uploading as ${currentUser.name}` : 'Sign in to upload and share files'}
+          </p>
+        </div>
         <div className="text-sm text-gray-500">
           {files.length} files • {formatFileSize(files.reduce((total, file) => total + file.size, 0))} total
         </div>
@@ -161,10 +212,18 @@ const FileManager = () => {
         </label>
       </div>
 
+      {error ? (
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+
       {/* Files List */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Files</h3>
-        {files.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8 text-gray-500">Loading your files…</div>
+        ) : files.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No files uploaded yet. Upload your first document above.
           </div>
@@ -184,21 +243,25 @@ const FileManager = () => {
                     <h4 className="font-medium text-gray-900">{file.name}</h4>
                     <p className="text-sm text-gray-500">
                       {formatFileSize(file.size)} • Uploaded on {new Date(file.uploadDate).toLocaleDateString()}
+                      {(file.uploadedBy || file.uploadedByEmail) ? ` • Uploaded by ${file.uploadedBy || file.uploadedByEmail}` : ''}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => downloadFile(file)}
+                    type="button"
+                    onClick={() => void downloadFile(file)}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Download"
                   >
                     <Download className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => deleteFile(file.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete"
+                    type="button"
+                    onClick={() => void deleteFile(file)}
+                    disabled={removingFileId === file.id}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Remove"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
