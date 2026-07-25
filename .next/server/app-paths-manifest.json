@@ -1,9 +1,5 @@
 {
-  "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
   "/login/page": "app/login/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/api/uploads/route": "app/api/uploads/route.js",
-  "/api/users/route": "app/api/users/route.js",
-  "/api/uploads/share/route": "app/api/uploads/share/route.js"
+  "/signup/page": "app/signup/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }
