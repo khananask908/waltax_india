@@ -8,13 +8,17 @@ import FileManager from '../components/dashboard/FileManager';
 import ComplianceCalendar from '../components/dashboard/ComplianceCalendar';
 import UserWallet from '../components/dashboard/UserWallet';
 import Button from '../components/ui/Button';
+import { getCurrentUser } from '../lib/auth';
+import type { AuthUser } from '../lib/auth-types';
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const user = { name: 'Guest User', email: 'guest@example.com', phone: '', company: '' };
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const displayName = user?.name || 'Guest User';
 
   useEffect(() => {
     document.title = 'Dashboard - WalTax India';
+    setUser(getCurrentUser());
   }, []);
 
   const tabs = [
@@ -37,7 +41,7 @@ const DashboardPage = () => {
         return (
           <div className="space-y-8">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Welcome back, {user?.name}!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Welcome back, {displayName}!</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-primary-50 rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-primary-900 mb-2">Active Services</h3>
