@@ -1,5 +1,6 @@
 {
   "pages": {
+<<<<<<< HEAD
     "/not-found": [
       "static/chunks/webpack-34470075ca0b1d9c.js",
       "static/chunks/fd9d1056-011e0e0ad4d2ee04.js",
@@ -14,6 +15,12 @@
       "static/chunks/2117-c2365d9ceab3de0b.js",
       "static/chunks/main-app-a1c9c9cb64856540.js",
       "static/chunks/app/_not-found/page-758549684486bf16.js"
+=======
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/login/page.js"
+>>>>>>> 525edf0acd9c9209a0fedbc60f2d687523e1072f
     ],
     "/layout": [
       "static/chunks/webpack-34470075ca0b1d9c.js",
@@ -35,6 +42,7 @@
       "static/chunks/2972-8c18bfcf774edcae.js",
       "static/chunks/app/admin-login/page-95eeee1c8eaf5666.js"
     ],
+<<<<<<< HEAD
     "/about/page": [
       "static/chunks/webpack-34470075ca0b1d9c.js",
       "static/chunks/fd9d1056-011e0e0ad4d2ee04.js",
@@ -752,6 +760,22 @@
       "static/chunks/main-app-a1c9c9cb64856540.js",
       "static/chunks/1033-f4c06d9599e99c1b.js",
       "static/chunks/app/terms-conditions/page-66d06e6fc582f800.js"
+=======
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
+    ],
+    "/signup/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/signup/page.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/page.js"
+>>>>>>> 525edf0acd9c9209a0fedbc60f2d687523e1072f
     ]
   }
 }

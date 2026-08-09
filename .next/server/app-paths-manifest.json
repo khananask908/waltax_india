@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "/_not-found/page": "app/_not-found/page.js",
   "/admin-login/page": "app/admin-login/page.js",
   "/about/page": "app/about/page.js",
@@ -84,4 +85,9 @@
   "/services/udyam/page": "app/services/udyam/page.js",
   "/testimonials/page": "app/testimonials/page.js",
   "/terms-conditions/page": "app/terms-conditions/page.js"
+=======
+  "/login/page": "app/login/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
+>>>>>>> 525edf0acd9c9209a0fedbc60f2d687523e1072f
 }

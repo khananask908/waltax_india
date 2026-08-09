@@ -44,9 +44,7 @@ Create a `.env.local` file in the project root and add:
 ```env
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-ADMIN_EMAIL=anash123@gmail.com
-ADMIN_PASSWORD=12345678
-NEXT_PUBLIC_ADMIN_EMAIL=anash123@gmail.com
+
 ```
 
 ### 3. Run the development server
