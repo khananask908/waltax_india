@@ -116,3 +116,4 @@ export const signupUser = async (
 ) => {
   return sendAuthRequest('signup', { name, email, password, company, phone });
 };
+

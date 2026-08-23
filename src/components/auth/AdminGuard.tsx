@@ -11,7 +11,7 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
     const user = getCurrentUser();
 
     if (!user || user.role !== 'admin') {
-      router.replace('/login?redirect=%2Fadmin');
+      router.replace('/admin-login');
     }
   }, [router]);
 

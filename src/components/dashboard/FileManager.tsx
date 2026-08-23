@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Download, Trash2, File, FileText, Image, Video, Music } from 'lucide-react';
 import Button from '../ui/Button';
-import { getAuthToken, getCurrentUser } from '@/lib/auth';
+import { useUser } from '@clerk/nextjs';
 
 interface UploadedFile {
   id: string;
@@ -24,16 +24,18 @@ const FileManager = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [removingFileId, setRemovingFileId] = useState<string | null>(null);
-  const currentUser = getCurrentUser();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const currentUser = user
+    ? {
+        name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.primaryEmailAddress?.emailAddress || 'WalTax User',
+        email: user.primaryEmailAddress?.emailAddress || '',
+      }
+    : null;
 
   const fetchFiles = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/uploads', {
-        headers: {
-          Authorization: `Bearer ${getAuthToken() || ''}`,
-        },
-      });
+      const response = await fetch('/api/uploads');
 
       if (!response.ok) {
         throw new Error('Unable to load files right now.');
@@ -70,7 +72,7 @@ const FileManager = () => {
   };
 
   const handleFileUpload = async (selectedFiles: FileList) => {
-    if (!getAuthToken()) {
+    if (!isLoaded || !isSignedIn) {
       setError('Please sign in before uploading files.');
       return;
     }
@@ -88,9 +90,6 @@ const FileManager = () => {
 
         const response = await fetch('/api/uploads', {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${getAuthToken() || ''}`,
-          },
           body: formData,
         });
 
@@ -133,7 +132,7 @@ const FileManager = () => {
   };
 
   const deleteFile = async (file: UploadedFile) => {
-    if (!getAuthToken()) {
+    if (!isLoaded || !isSignedIn) {
       setError('Please sign in before deleting files.');
       return;
     }
@@ -144,9 +143,6 @@ const FileManager = () => {
     try {
       const response = await fetch(`/api/uploads?id=${encodeURIComponent(file.id)}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${getAuthToken() || ''}`,
-        },
       });
 
       const data = await response.json().catch(() => ({}));

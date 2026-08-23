@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, ChevronDown, ShoppingCart } from 'lucide-react';
+import { UserButton, useClerk, useUser } from '@clerk/nextjs';
 import Logo from './Logo';
 import { useCartStore } from '../../store/cartStore';
 import CartDropdown from '../cart/CartDropdown';
-import { getCurrentUser, isAuthenticated, logoutUser } from '@/lib/auth';
+import { getCurrentUser, logoutUser } from '@/lib/auth';
 
 interface HeaderProps {
   isScrolled: boolean;
@@ -99,15 +100,15 @@ const Header = ({ isScrolled }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { isLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const { items } = useCartStore();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     const syncAuthState = () => {
-      setAuthenticated(isAuthenticated());
       setIsAdmin(getCurrentUser()?.role === 'admin');
     };
 
@@ -123,13 +124,17 @@ const Header = ({ isScrolled }: HeaderProps) => {
   }, []);
 
   const isHomePage = pathname === '/';
+  const authenticated = isAdmin || (isLoaded && isSignedIn);
   const isSolidHeader = isScrolled || !isHomePage;
 
-  const handleLogout = () => {
-    logoutUser();
-    setAuthenticated(false);
+  const handleLogout = async () => {
+    if (isAdmin) {
+      logoutUser();
+    } else {
+      await signOut({ redirectUrl: '/' });
+    }
     setIsAdmin(false);
-    router.push('/login');
+    router.push(isAdmin ? '/admin-login' : '/');
   };
 
   const headerClass = isSolidHeader
@@ -204,7 +209,9 @@ const Header = ({ isScrolled }: HeaderProps) => {
               <Link href="/admin" className="px-3 py-1.5 bg-white border border-primary-600 text-primary-600 rounded-md hover:bg-primary-50 transition-colors text-sm">Admin</Link>
             )}
             {authenticated ? (
-              <button onClick={handleLogout} className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">Logout</button>
+              isAdmin ? (
+                <button onClick={() => void handleLogout()} className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">Logout</button>
+              ) : <UserButton />
             ) : (
               <Link href="/login" className="px-3 py-1.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-sm">Login</Link>
             )}
@@ -233,7 +240,7 @@ const Header = ({ isScrolled }: HeaderProps) => {
                 <Link href="/admin" className="py-2 px-4 bg-white border border-primary-600 text-primary-600 rounded-md text-center" onClick={() => setIsMenuOpen(false)}>Admin</Link>
               )}
               {authenticated ? (
-                <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="py-2 px-4 bg-red-600 text-white rounded-md text-center hover:bg-red-700 transition-colors">Logout</button>
+                <button onClick={() => { void handleLogout(); setIsMenuOpen(false); }} className="py-2 px-4 bg-red-600 text-white rounded-md text-center hover:bg-red-700 transition-colors">Logout</button>
               ) : (
                 <Link href="/login" className="py-2 px-4 bg-primary-600 text-white rounded-md text-center" onClick={() => setIsMenuOpen(false)}>Login</Link>
               )}

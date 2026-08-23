@@ -2,24 +2,46 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { User, FileText, Calendar, Wallet, Settings, Bell } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import Container from '../components/ui/Container';
 import FileManager from '../components/dashboard/FileManager';
 import ComplianceCalendar from '../components/dashboard/ComplianceCalendar';
 import UserWallet from '../components/dashboard/UserWallet';
 import Button from '../components/ui/Button';
-import { getCurrentUser } from '../lib/auth';
 import type { AuthUser } from '../lib/auth-types';
 
 const DashboardPage = () => {
+  const router = useRouter();
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
   const [activeTab, setActiveTab] = useState('overview');
   const [user, setUser] = useState<AuthUser | null>(null);
   const displayName = user?.name || 'Guest User';
 
   useEffect(() => {
     document.title = 'Dashboard - WalTax India';
-    setUser(getCurrentUser());
-  }, []);
+
+    if (!isLoaded) {
+      return;
+    }
+
+    if (!isSignedIn || !clerkUser) {
+      router.replace('/login?redirect=%2Fdashboard');
+      return;
+    }
+
+    const email = clerkUser.primaryEmailAddress?.emailAddress || '';
+    setUser({
+      id: clerkUser.id,
+      name: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email.split('@')[0] || 'WalTax User',
+      email,
+      company: '',
+      phone: '',
+      createdAt: clerkUser.createdAt ? new Date(clerkUser.createdAt).toISOString() : new Date().toISOString(),
+      role: 'user',
+    });
+  }, [clerkUser, isLoaded, isSignedIn, router]);
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: User },

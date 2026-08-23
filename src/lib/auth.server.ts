@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { currentUser } from '@clerk/nextjs/server';
 import { getMongoDb } from './mongodb';
 import type { AuthUser, StoredUser } from './auth-types';
 
@@ -118,16 +119,28 @@ export async function getUserFromToken(token: string): Promise<AuthUser | null> 
 export async function getCurrentUserFromRequest(request: Request): Promise<AuthUser | null> {
   const authorization = request.headers.get('authorization');
 
-  if (!authorization?.startsWith('Bearer ')) {
+  if (authorization?.startsWith('Bearer ')) {
+    const token = authorization.slice('Bearer '.length).trim();
+    if (token) {
+      return getUserFromToken(token);
+    }
+  }
+
+  const clerkUser = await currentUser();
+  const email = clerkUser?.primaryEmailAddress?.emailAddress;
+  if (!clerkUser || !email) {
     return null;
   }
 
-  const token = authorization.slice('Bearer '.length).trim();
-  if (!token) {
-    return null;
-  }
-
-  return getUserFromToken(token);
+  return {
+    id: clerkUser.id,
+    name: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email.split('@')[0],
+    email,
+    company: '',
+    phone: '',
+    createdAt: new Date(clerkUser.createdAt).toISOString(),
+    role: 'user',
+  };
 }
 
 export async function createUser(input: {

@@ -47,6 +47,7 @@ JWT_SECRET=your_jwt_secret
 
 ```
 
+
 ### 3. Run the development server
 
 ```bash
